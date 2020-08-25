@@ -1,23 +1,48 @@
+import { getCustomRepository, getRepository } from 'typeorm';
 import Transaction from '../models/Transaction';
 import TransactionRepository from '../repositories/TransactionRepository';
+import CreateCategoryServices from './CreateCategoryServices';
+import AppError from '../errors/AppError';
 
+interface Balance {
+  income: number;
+  outcome: number;
+  total: number;
+}
+interface Request {
+  type: 'income' | 'outcome';
+  value: number;
+  title: string;
+  category: string;
+}
 class CreateTransactionServices {
-  private transactionRepository: TransactionRepository;
+  public async execute({
+    type,
+    value,
+    title,
+    category,
+  }: Request): Promise<Transaction> {
+    const transactionRepository = getCustomRepository(
+      TransactionRepository,
+      'default'
+    );
 
-  constructor(transactionRepository: TransactionRepository) {
-    this.transactionRepository = transactionRepository;
-  }
-
-  public execute({ type, value, title }: Omit<Transaction, 'id'>): Transaction {
-    const balance = this.transactionRepository.getBalance();
+    const balance = await transactionRepository.getBalance();
     if (type === 'outcome' && value > balance.total) {
-      throw Error('Value is higher than balance');
+      throw new AppError('Value is higher than balance');
     }
-    const transaction = this.transactionRepository.create({
-      type,
-      value,
+
+    const categoryServices = new CreateCategoryServices();
+    const categoryFound = await categoryServices.execute({ title: category });
+
+    const transaction = transactionRepository.create({
       title,
+      value,
+      category_id: categoryFound,
+      type,
     });
+
+    await transactionRepository.save(transaction);
 
     return transaction;
   }
