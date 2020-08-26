@@ -77,7 +77,9 @@ class ImportTransactionService {
     );
 
     try {
-      await categoryRepository.save(newCategories);
+      if (newCategories.length > 0) {
+        await categoryRepository.save(newCategories);
+      }
 
       const finalCategories = [...newCategories, ...existedCategories];
 
@@ -91,10 +93,11 @@ class ImportTransactionService {
           ),
         }))
       );
-
-      await transactionRepository.save(newTransactions);
+      if (newTransactions.length > 0) {
+        await transactionRepository.save(newTransactions);
+      }
     } catch (error) {
-      console.log(`erro = ${error.message}`);
+      console.log(`erro = ${error}`);
     }
 
     // console.log(newCategories);

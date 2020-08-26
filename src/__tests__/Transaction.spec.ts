@@ -27,10 +27,10 @@ describe('Transaction', () => {
   });
 
   afterAll(async () => {
-    // const mainConnection = getConnection('default');
+    const mainConnection = getConnection('default');
 
     await connection.close();
-    // await mainConnection.close();
+    await mainConnection.close();
   });
 
   it('should be able to list transactions', async () => {
