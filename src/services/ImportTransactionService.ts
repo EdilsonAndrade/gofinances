@@ -103,7 +103,7 @@ class ImportTransactionService {
     // console.log(newCategories);
     // // await transactionRepository.save(transaction);
     // // console.log(`transaction sved = ${transaction}`);
-    // await fs.promises.unlink(filePath);
+    await fs.promises.unlink(filePath);
   }
 }
 
