@@ -56,7 +56,7 @@ class ImportTransactionService {
 
     await new Promise((resolve) => parseCsv.on('end', resolve));
 
-    fs.promises.unlink(filePath);
+    await fs.promises.unlink(filePath);
 
     const existedCategories = await categoryRepository.find({
       where: { title: In(categories) },
@@ -76,34 +76,24 @@ class ImportTransactionService {
       }))
     );
 
-    try {
-      if (newCategories.length > 0) {
-        await categoryRepository.save(newCategories);
-      }
-
-      const finalCategories = [...newCategories, ...existedCategories];
-
-      const newTransactions = transactionRepository.create(
-        transactions.map((t) => ({
-          title: t.title,
-          value: t.value,
-          type: t.type,
-          category_id: finalCategories.find(
-            (category) => category.title === t.title
-          ),
-        }))
-      );
-      if (newTransactions.length > 0) {
-        await transactionRepository.save(newTransactions);
-      }
-    } catch (error) {
-      console.log(`erro = ${error}`);
+    if (newCategories.length > 0) {
+      await categoryRepository.save(newCategories);
     }
 
-    // console.log(newCategories);
-    // // await transactionRepository.save(transaction);
-    // // console.log(`transaction sved = ${transaction}`);
-    await fs.promises.unlink(filePath);
+    const finalCategories = [...newCategories, ...existedCategories];
+    const newTransactions = transactionRepository.create(
+      transactions.map((t) => ({
+        title: t.title,
+        value: t.value,
+        type: t.type,
+        category_id: finalCategories.find(
+          (category) => category.title === t.category
+        ),
+      }))
+    );
+    if (newTransactions.length > 0) {
+      await transactionRepository.save(newTransactions);
+    }
   }
 }
 
