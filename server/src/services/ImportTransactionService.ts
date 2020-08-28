@@ -86,7 +86,7 @@ class ImportTransactionService {
         title: t.title,
         value: t.value,
         type: t.type,
-        category_id: finalCategories.find(
+        category: finalCategories.find(
           (category) => category.title === t.category
         ),
       }))
